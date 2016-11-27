@@ -28,7 +28,7 @@ import javax.net.ssl.SSLEngine;
  */
 public class BetterSslHandler extends SessionAwareSslHandler {
 
-    private final OpenSslEngine sslEngine;
+    private final NiftySslEngine sslEngine;
     // Effective Java Item 7 - use a finalizer guardian object to make sure a misbehaving subclass cannot
     // prevent our finalizer from running (by overriding it and failing to call super.finalize()).
     private final Object finalizerGuardian = new Object() {
@@ -38,8 +38,10 @@ public class BetterSslHandler extends SessionAwareSslHandler {
         }
     };
 
-    public BetterSslHandler(SSLEngine engine, SslBufferPool bufferPool, SslServerConfiguration configuration) {
+    public BetterSslHandler(NiftySslEngine engine,
+        SslBufferPool bufferPool,
+        SslServerConfiguration configuration) {
         super(engine, bufferPool, configuration);
-        sslEngine = (OpenSslEngine) engine;
+        sslEngine = engine;
     }
 }

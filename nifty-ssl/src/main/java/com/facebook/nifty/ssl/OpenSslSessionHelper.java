@@ -16,7 +16,6 @@
 package com.facebook.nifty.ssl;
 
 import org.apache.tomcat.jni.SSL;
-import org.jboss.netty.handler.ssl.OpenSslEngine;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
@@ -32,28 +31,14 @@ import java.lang.reflect.Field;
  * we have to extract the properties that we need ourselves.
  */
 public class OpenSslSessionHelper {
-    private static Field sslField;
-
-    static {
-        try {
-            sslField = OpenSslEngine.class.getDeclaredField("ssl");
-            sslField.setAccessible(true);
-        }
-        catch (Throwable t) {
-            // Ignore.
-        }
-    }
 
     public static SslSession getSession(SSLEngine sslEngine) throws SSLException {
-        if (!(sslEngine instanceof OpenSslEngine)) {
+        if (!(sslEngine instanceof NiftySslEngine)) {
             throw new IllegalArgumentException("ssl engine not openssl engine");
         }
-        OpenSslEngine engine = (OpenSslEngine) sslEngine;
-        if (sslField == null) {
-            throw new SSLException("SSL field is null");
-        }
+        NiftySslEngine engine = (NiftySslEngine) sslEngine;
         try {
-            long sslPtr = (long) sslField.get(engine);
+            long sslPtr = engine.getSslPtr();
             if (sslPtr == 0) {
                 throw new SSLException("SSL not initialized");
             }
@@ -73,9 +58,6 @@ public class OpenSslSessionHelper {
                 certificate = X509Certificate.getInstance(cert);
             }
             return new SslSession(alpn, npn, version, cipher, establishedTime, certificate);
-        }
-        catch (IllegalAccessException e) {
-            throw new SSLException(e);
         }
         catch (CertificateException e) {
             throw new SSLException(e);

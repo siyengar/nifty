@@ -20,11 +20,9 @@ import org.apache.tomcat.jni.Pool;
 import org.apache.tomcat.jni.SSL;
 import org.apache.tomcat.jni.SSLContext;
 import org.apache.tomcat.jni.SessionTicketKey;
-import org.jboss.netty.handler.ssl.OpenSslEngine;
 import org.jboss.netty.handler.ssl.SslBufferPool;
 import org.jboss.netty.handler.ssl.SslHandler;
 
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.util.Collections;
@@ -263,12 +261,12 @@ public final class NiftyOpenSslServerContext implements SslHandlerFactory {
     /**
      * Returns a new server-side {@link SSLEngine} with the current configuration.
      */
-    public SSLEngine newEngine() {
+    public NiftySslEngine newEngine() {
         if (nextProtocols.isEmpty()) {
-            return new OpenSslEngine(ctx, bufferPool, null);
+            return new NiftySslEngine(ctx, bufferPool, null, sslServerConfiguration.bioSize);
         } else {
-            return new OpenSslEngine(
-                    ctx, bufferPool, nextProtocols.get(nextProtocols.size() - 1));
+            return new NiftySslEngine(
+                    ctx, bufferPool, nextProtocols.get(nextProtocols.size() - 1), sslServerConfiguration.bioSize);
         }
     }
 

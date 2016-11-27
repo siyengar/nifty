@@ -69,6 +69,10 @@ public class OpenSslServerConfiguration extends SslServerConfiguration {
         public Iterable<String> nextProtocols = ImmutableList.of("thrift");
         public File clientCAFile;
         public SSLVerification sslVerification = SSLVerification.VERIFY_OPTIONAL;
+        // Size of the allocation of buffer to use per connection to read and write SSL data.
+        // This exposes a bit of the internal details of the implementation that's used, but it's
+        // quite useful.
+        public int bioSize = 17 * 1024;
 
         public Builder() {
             this.ciphers = SslDefaults.SERVER_DEFAULTS;
@@ -136,6 +140,11 @@ public class OpenSslServerConfiguration extends SslServerConfiguration {
             return this;
         }
 
+        public Builder bioSize(int bioSize) {
+            this.bioSize = bioSize;
+            return this;
+        }
+
         /**
          * Copies the state of an existing configration into this builder.
          * @param config the SSL configuration.
@@ -158,6 +167,7 @@ public class OpenSslServerConfiguration extends SslServerConfiguration {
                 nextProtocols(openSslConfig.nextProtocols);
                 clientCAFile(openSslConfig.clientCAFile);
                 sslVerification(openSslConfig.sslVerification);
+                bioSize(openSslConfig.bioSize);
             } else {
                 throw new IllegalArgumentException("Provided configuration is not an OpenSslServerConfiguration");
             }
@@ -195,6 +205,7 @@ public class OpenSslServerConfiguration extends SslServerConfiguration {
     public final Iterable<String> nextProtocols;
     public final File clientCAFile;
     public final SSLVerification sslVerification;
+    public final int bioSize;
 
     private OpenSslServerConfiguration(Builder builder) {
         super(builder);
@@ -210,6 +221,7 @@ public class OpenSslServerConfiguration extends SslServerConfiguration {
         this.nextProtocols = builder.nextProtocols;
         this.clientCAFile = builder.clientCAFile;
         this.sslVerification = builder.sslVerification;
+        this.bioSize = builder.bioSize;
     }
 
     public static OpenSslServerConfiguration.Builder newBuilder() {
